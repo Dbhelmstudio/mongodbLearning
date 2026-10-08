@@ -1,0 +1,9 @@
+# Filesystem storage must be the same path on every agent (a shared volume in this lab).
+storage:
+  type: filesystem
+  filesystem:
+    path: /backups
+pitr:
+  enabled: false
+  # One-minute oplog slices so the PITR drill does not need a ten-minute wait.
+  oplogSpanMin: 1

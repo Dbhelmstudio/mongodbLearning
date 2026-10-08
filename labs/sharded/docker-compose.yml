@@ -1,0 +1,83 @@
+# MongoDB Mastery lab: minimal sharded cluster.
+# One config server replica set (cfg), two single-member shard replica sets
+# (sh1, sh2) and one mongos on 127.0.0.1:27020.
+#
+#   docker compose up -d
+#   docker exec -it mm-mongos mongosh
+#   docker compose down -v
+#
+# Guided drills: open the site and go to Guides > Labs (#/labs).
+# Lab only: single-member shards, no authentication.
+name: mm-sharded
+
+x-healthy: &healthy
+  healthcheck:
+    test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+    interval: 5s
+    timeout: 5s
+    retries: 30
+  networks: [mmshard]
+
+services:
+  mm-cfg1:
+    <<: *healthy
+    image: ${MONGO_IMAGE:-mongo:8.0}
+    container_name: mm-cfg1
+    hostname: mm-cfg1
+    command: ["--configsvr", "--replSet", "cfg", "--bind_ip_all", "--port", "27017"]
+    volumes: [cfg1:/data/db]
+  mm-sh1:
+    <<: *healthy
+    image: ${MONGO_IMAGE:-mongo:8.0}
+    container_name: mm-sh1
+    hostname: mm-sh1
+    command: ["--shardsvr", "--replSet", "sh1", "--bind_ip_all", "--port", "27017"]
+    volumes: [sh1:/data/db]
+  mm-sh2:
+    <<: *healthy
+    image: ${MONGO_IMAGE:-mongo:8.0}
+    container_name: mm-sh2
+    hostname: mm-sh2
+    command: ["--shardsvr", "--replSet", "sh2", "--bind_ip_all", "--port", "27017"]
+    volumes: [sh2:/data/db]
+
+  mm-shard-init:
+    image: ${MONGO_IMAGE:-mongo:8.0}
+    container_name: mm-shard-init
+    depends_on:
+      mm-cfg1: { condition: service_healthy }
+      mm-sh1: { condition: service_healthy }
+      mm-sh2: { condition: service_healthy }
+    entrypoint: ["mongosh", "--quiet", "--nodb", "/scripts/init-replsets.js"]
+    volumes: ["./scripts:/scripts:ro"]
+    networks: [mmshard]
+    restart: "no"
+
+  mm-mongos:
+    <<: *healthy
+    image: ${MONGO_IMAGE:-mongo:8.0}
+    container_name: mm-mongos
+    hostname: mm-mongos
+    command: ["mongos", "--configdb", "cfg/mm-cfg1:27017", "--bind_ip_all", "--port", "27017"]
+    ports: ["127.0.0.1:27020:27017"]
+    depends_on:
+      mm-shard-init: { condition: service_completed_successfully }
+
+  mm-add-shards:
+    image: ${MONGO_IMAGE:-mongo:8.0}
+    container_name: mm-add-shards
+    depends_on:
+      mm-mongos: { condition: service_healthy }
+    entrypoint: ["mongosh", "--quiet", "--host", "mm-mongos", "/scripts/add-shards.js"]
+    volumes: ["./scripts:/scripts:ro"]
+    networks: [mmshard]
+    restart: "no"
+
+networks:
+  mmshard:
+    name: mmshard
+
+volumes:
+  cfg1:
+  sh1:
+  sh2:

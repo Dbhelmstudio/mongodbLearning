@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MongoDB Mastery — learn MongoDB from first query to sharded clusters</title>
+  <meta name="description" content="Interactive MongoDB course with a real query engine in your browser: CRUD, aggregation, indexes and explain(), schema design, transactions, replica sets, sharding, WiredTiger internals, performance tuning and interview preparation.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%2300ed64' d='M16 2c3 4 8 8 8 15 0 6-4 10-7 11l-1 2-1-2c-3-1-7-5-7-11 0-7 5-11 8-15z'/%3E%3Cpath fill='%23001e2b' d='M16 8v19' stroke='%23001e2b' stroke-width='1.2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>try { document.documentElement.setAttribute('data-theme', localStorage.getItem('mm-theme') || 'dark'); } catch (e) {}</script>
+</head>
+<body>
+  <header class="topbar">
+    <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menu">Menu</button>
+    <a class="brand" href="#/">
+      <svg class="leaf" viewBox="0 0 32 32" aria-hidden="true"><path fill="#00ed64" d="M16 2c3 4 8 8 8 15 0 6-4 10-7 11l-1 2-1-2c-3-1-7-5-7-11 0-7 5-11 8-15z"/><path d="M16 8v19" stroke="#001e2b" stroke-width="1.2"/></svg>
+      MongoDB Mastery
+    </a>
+    <nav class="nav" id="nav">
+      <a href="#/learn" data-r="learn">Learn</a>
+      <a href="#/playground" data-r="playground">Playground</a>
+      <a href="#/exercises" data-r="exercises">Exercises</a>
+      <a href="#/scenarios" data-r="scenarios">Scenarios</a>
+      <a href="#/guides" data-r="guides">Guides</a>
+      <a href="#/interview" data-r="interview">Interview</a>
+      <a href="#/certification" data-r="certification">Certification</a>
+      <a href="#/review" data-r="review">Review <span class="nav-badge" id="reviewBadge" hidden></span></a>
+      <a href="#/progress" data-r="progress">Progress</a>
+    </nav>
+    <div class="top-actions">
+      <button class="icon-btn" id="searchBtn" title="Search (Ctrl+K)">Search <kbd>Ctrl K</kbd></button>
+      <button class="icon-btn" id="themeBtn" title="Toggle theme">Theme</button>
+    </div>
+  </header>
+  <main id="app"><div class="wrap"><p class="muted">Loading the in-browser MongoDB engine…</p></div></main>
+  <footer class="foot">
+    MongoDB Mastery runs entirely in your browser. The query engine is a simulator built on
+    <a href="https://github.com/kofrasa/mingo" target="_blank" rel="noopener">mingo</a> (MIT) with a modelled planner;
+    replication and sharding are taught with interactive simulators. MongoDB is a trademark of MongoDB, Inc.; this project is independent.
+    <a href="#/about">About this course</a>
+  </footer>
+
+  <script src="vendor/mingo.min.js"></script>
+  <script src="vendor/acorn.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/seed.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/shell.js"></script>
+  <script src="js/content/lessons-1-beginner.js"></script>
+  <script src="js/content/lessons-2-intermediate.js"></script>
+  <script src="js/content/lessons-3-advanced.js"></script>
+  <script src="js/content/lessons-4-engineer.js"></script>
+  <script src="js/content/lessons-5-architect.js"></script>
+  <script src="js/content/lessons-6-distributed.js"></script>
+  <script src="js/content/lessons-7-ai.js"></script>
+  <script src="js/content/lessons-8-extended.js"></script>
+  <script src="js/content/interview.js"></script>
+  <script src="js/content/problems.js"></script>
+  <script src="js/content/pages.js"></script>
+  <script src="js/content/meta.js"></script>
+  <script src="js/content/versions.js"></script>
+  <script src="js/content/scenarios.js"></script>
+  <script src="js/content/labs.js"></script>
+  <script src="js/visualizers.js"></script>
+  <script src="js/study.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

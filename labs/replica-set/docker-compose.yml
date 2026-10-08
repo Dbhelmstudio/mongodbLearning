@@ -1,0 +1,89 @@
+# MongoDB Mastery lab: three-member replica set (rs0), plus optional
+# Percona Backup for MongoDB agents for the PITR drill.
+#
+#   docker compose up -d                  # replica set only
+#   docker compose --profile pbm up -d    # replica set + PBM agents
+#   docker compose down -v                # stop and delete all lab data
+#
+# Guided drills: open the site and go to Guides > Labs (#/labs).
+# Lab only: no authentication, ports bound to 127.0.0.1.
+name: mm-rs
+
+x-mongod: &mongod
+  image: ${MONGO_IMAGE:-mongo:8.0}
+  command: ["--replSet", "rs0", "--bind_ip_all", "--oplogSize", "990"]
+  healthcheck:
+    test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+    interval: 5s
+    timeout: 5s
+    retries: 30
+  networks: [mmlab]
+
+x-pbm: &pbm
+  image: ${PBM_IMAGE:-percona/percona-backup-mongodb:2}
+  profiles: ["pbm"]
+  # Agents share one filesystem backup store; root avoids volume permission issues in the lab.
+  user: "0"
+  volumes:
+    - backups:/backups
+    - ./scripts:/scripts:ro
+  networks: [mmlab]
+  restart: unless-stopped
+
+services:
+  mm-rs1:
+    <<: *mongod
+    container_name: mm-rs1
+    hostname: mm-rs1
+    ports: ["127.0.0.1:27017:27017"]
+    volumes: [rs1:/data/db]
+  mm-rs2:
+    <<: *mongod
+    container_name: mm-rs2
+    hostname: mm-rs2
+    ports: ["127.0.0.1:27018:27017"]
+    volumes: [rs2:/data/db]
+  mm-rs3:
+    <<: *mongod
+    container_name: mm-rs3
+    hostname: mm-rs3
+    ports: ["127.0.0.1:27019:27017"]
+    volumes: [rs3:/data/db]
+
+  mm-rs-init:
+    image: ${MONGO_IMAGE:-mongo:8.0}
+    container_name: mm-rs-init
+    depends_on:
+      mm-rs1: { condition: service_healthy }
+      mm-rs2: { condition: service_healthy }
+      mm-rs3: { condition: service_healthy }
+    entrypoint: ["mongosh", "--quiet", "--host", "mm-rs1", "/scripts/init-rs.js"]
+    volumes: ["./scripts:/scripts:ro"]
+    networks: [mmlab]
+    restart: "no"
+
+  mm-pbm1:
+    <<: *pbm
+    container_name: mm-pbm1
+    environment: { PBM_MONGODB_URI: "mongodb://mm-rs1:27017/?directConnection=true" }
+    depends_on: { mm-rs-init: { condition: service_completed_successfully } }
+  mm-pbm2:
+    <<: *pbm
+    container_name: mm-pbm2
+    environment: { PBM_MONGODB_URI: "mongodb://mm-rs2:27017/?directConnection=true" }
+    depends_on: { mm-rs-init: { condition: service_completed_successfully } }
+  mm-pbm3:
+    <<: *pbm
+    container_name: mm-pbm3
+    environment: { PBM_MONGODB_URI: "mongodb://mm-rs3:27017/?directConnection=true" }
+    depends_on: { mm-rs-init: { condition: service_completed_successfully } }
+
+networks:
+  mmlab:
+    name: mmlab
+
+volumes:
+  rs1:
+  rs2:
+  rs3:
+  backups:
